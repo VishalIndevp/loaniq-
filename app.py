@@ -7,7 +7,7 @@ import joblib
 # ─────────────────────────────────────────────
 st.set_page_config(
     page_title="LoanIQ · Approval Predictor",
-    page_icon="💎",
+    page_icon="💵",
     layout="wide",
     initial_sidebar_state="expanded",
 )
@@ -1060,7 +1060,7 @@ st.markdown("""
 
 <div class="footer-wrap">
   <div class="footer-tagline">Join my journey and let's explore together.</div>
-  <div class="footer-sub">It is a prediction, not a spoiler.</div>
+  <div class="footer-sub">I make predictions, not spoilers</div>
   <div class="footer-socials">
     <a class="social-btn linkedin"   href="https://www.linkedin.com/in/vishal-singh-here/" target="_blank"><span class="s-icon">💼</span> LinkedIn</a>
     <a class="social-btn github"     href="https://github.com/VishalIndevp"               target="_blank"><span class="s-icon">🐙</span> GitHub</a>
