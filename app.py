@@ -7,100 +7,78 @@ import joblib
 # ─────────────────────────────────────────────
 st.set_page_config(
     page_title="LoanIQ · Approval Predictor",
-    page_icon="💵",
+    page_icon="💎",
     layout="wide",
     initial_sidebar_state="expanded",
 )
 
 
 # ─────────────────────────────────────────────
-#  FIX TOP PADDING (CSS only - works on Streamlit Cloud)
+#  STYLE STREAMLIT HEADER TO MATCH THEME
 # ─────────────────────────────────────────────
 st.markdown("""
 <style>
-.css-18e3th9 { padding-top: 0 !important; }
-.css-1d391kg { padding-top: 0 !important; }
-.css-z5fcl4  { padding-top: 1rem !important; }
-.css-1y4p8pa { padding-top: 0 !important; }
-[data-testid="stHeader"] { background: transparent !important; border: none !important; }
+/* Keep Streamlit header but style it dark to blend in */
+[data-testid="stHeader"] {
+    background: #0b0f1a !important;
+    border-bottom: 1px solid #1e2d45 !important;
+    height: 3rem !important;
+}
 [data-testid="stDecoration"] { display: none !important; }
 [data-testid="stStatusWidget"] { display: none !important; }
 .stDeployButton { display: none !important; }
-/* Make the native sidebar toggle always visible and styled */
+
+/* Style the sidebar collapse < button */
+[data-testid="stSidebarCollapseButton"] button,
+[data-testid="stSidebar"] [data-testid="baseButton-header"],
+button[data-testid="baseButton-header"] {
+    background: #111827 !important;
+    border: 1px solid #00d4a1 !important;
+    border-radius: 8px !important;
+    color: #00d4a1 !important;
+    box-shadow: 0 4px 16px rgba(0,212,161,0.3) !important;
+    transition: all 0.2s ease !important;
+}
+[data-testid="stSidebarCollapseButton"] button:hover,
+[data-testid="stSidebar"] [data-testid="baseButton-header"]:hover,
+button[data-testid="baseButton-header"]:hover {
+    background: #1a2235 !important;
+    box-shadow: 0 4px 24px rgba(0,212,161,0.5) !important;
+    transform: scale(1.08) !important;
+}
+
+/* Style the expand >> button when sidebar is collapsed */
 [data-testid="collapsedControl"] {
-    position: fixed !important;
-    top: 0.5rem !important;
-    left: 0.5rem !important;
-    z-index: 999999 !important;
-    background: #111827 !important;
-    border: 1px solid #00d4a1 !important;
-    border-radius: 8px !important;
-    width: 2.2rem !important;
-    height: 2.2rem !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    box-shadow: 0 4px 16px rgba(0,212,161,0.3) !important;
-    color: #00d4a1 !important;
-    cursor: pointer !important;
-    transition: all 0.2s ease !important;
+    top: 0.4rem !important;
 }
-[data-testid="collapsedControl"]:hover {
-    background: #1a2235 !important;
-    box-shadow: 0 4px 24px rgba(0,212,161,0.5) !important;
-    transform: scale(1.1) !important;
-}
-[data-testid="collapsedControl"] svg { color: #00d4a1 !important; fill: #00d4a1 !important; }
-
-/* ── Native sidebar open/close arrow button ── */
-/* The < button inside the open sidebar */
-[data-testid="stSidebar"] button[kind="header"],
-[data-testid="stSidebar"] [data-testid="baseButton-header"] {
-    position: fixed !important;
-    top: 0.6rem !important;
-    right: -1rem !important;
-    z-index: 999999 !important;
+[data-testid="collapsedControl"] button {
     background: #111827 !important;
     border: 1px solid #00d4a1 !important;
     border-radius: 8px !important;
     color: #00d4a1 !important;
-    width: 2.2rem !important;
-    height: 2.2rem !important;
-    box-shadow: 0 4px 16px rgba(0,212,161,0.3) !important;
-    transition: all 0.2s ease !important;
-}
-[data-testid="stSidebar"] button[kind="header"]:hover,
-[data-testid="stSidebar"] [data-testid="baseButton-header"]:hover {
-    background: #1a2235 !important;
-    box-shadow: 0 4px 24px rgba(0,212,161,0.5) !important;
-}
-
-/* The >> button when sidebar is collapsed */
-[data-testid="collapsedControl"] button,
-[data-testid="collapsedControl"] [data-testid="baseButton-header"] {
-    background: #111827 !important;
-    border: 1px solid #00d4a1 !important;
-    border-radius: 8px !important;
-    color: #00d4a1 !important;
-    width: 2.2rem !important;
-    height: 2.2rem !important;
     box-shadow: 0 4px 16px rgba(0,212,161,0.4) !important;
     transition: all 0.2s ease !important;
+    width: 2.2rem !important;
+    height: 2.2rem !important;
 }
 [data-testid="collapsedControl"] button:hover {
     background: #1a2235 !important;
     box-shadow: 0 4px 24px rgba(0,212,161,0.6) !important;
-    transform: scale(1.12) !important;
+    transform: scale(1.1) !important;
 }
 [data-testid="collapsedControl"] svg,
-[data-testid="stSidebar"] button[kind="header"] svg {
+button[data-testid="baseButton-header"] svg {
     color: #00d4a1 !important;
     fill: #00d4a1 !important;
-    width: 1rem !important;
-    height: 1rem !important;
 }
+
+/* Reduce top padding since header is visible */
+.main .block-container { padding-top: 0.5rem !important; }
+.css-18e3th9 { padding-top: 3rem !important; }
+.css-z5fcl4  { padding-top: 0.5rem !important; }
 </style>
 """, unsafe_allow_html=True)
+
 
 
 # ─────────────────────────────────────────────
@@ -146,40 +124,8 @@ html, body, [class*="css"] {
 [data-testid="stDecoration"]   { display: none !important; }
 [data-testid="stStatusWidget"] { display: none !important; }
 .stDeployButton                { display: none !important; }
-[data-testid="stToolbar"]      { display: none !important; }
 
-/* Make sidebar collapse button always visible and styled */
-[data-testid="collapsedControl"] {
-    display: flex !important;
-    top: 1rem !important;
-    background: #111827 !important;
-    border: 1px solid #1e2d45 !important;
-    border-radius: 50% !important;
-    width: 2rem !important;
-    height: 2rem !important;
-    align-items: center !important;
-    justify-content: center !important;
-    color: #00d4a1 !important;
-    box-shadow: 0 4px 12px rgba(0,212,161,0.2) !important;
-    transition: all 0.2s ease !important;
-    z-index: 9999 !important;
-}
-[data-testid="collapsedControl"]:hover {
-    background: #1a2235 !important;
-    border-color: #00d4a1 !important;
-    box-shadow: 0 4px 20px rgba(0,212,161,0.4) !important;
-    transform: scale(1.1) !important;
-}
-
-/* Sidebar expand button (the >> arrow when collapsed) */
-button[kind="header"] {
-    background: #111827 !important;
-    border: 1px solid #1e2d45 !important;
-    border-radius: 50% !important;
-    color: #00d4a1 !important;
-}
-
-div[data-testid="stAppViewContainer"] > section > div.block-container { padding-top: 1rem !important; }
+div[data-testid="stAppViewContainer"] > section > div.block-container { padding-top: 0.5rem !important; }
 
 /* ── Main container ── */
 .main .block-container {
@@ -1114,7 +1060,7 @@ st.markdown("""
 
 <div class="footer-wrap">
   <div class="footer-tagline">Join my journey and let's explore together.</div>
-  <div class="footer-sub">I make predictions, not spoilers.</div>
+  <div class="footer-sub">It is a prediction, not a spoiler.</div>
   <div class="footer-socials">
     <a class="social-btn linkedin"   href="https://www.linkedin.com/in/vishal-singh-here/" target="_blank"><span class="s-icon">💼</span> LinkedIn</a>
     <a class="social-btn github"     href="https://github.com/VishalIndevp"               target="_blank"><span class="s-icon">🐙</span> GitHub</a>
